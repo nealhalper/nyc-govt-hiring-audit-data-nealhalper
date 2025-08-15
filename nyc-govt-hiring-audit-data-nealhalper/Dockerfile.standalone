@@ -1,0 +1,52 @@
+# Standalone Docker Container for NYC Hiring Audit Pipeline
+# Use this for development/testing without full Airflow orchestration
+
+FROM python:3.11-slim
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    libpq-dev \
+    build-essential \
+    curl \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
+WORKDIR /app
+
+# Copy requirements and install Python packages
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Install additional packages for our pipeline
+RUN pip install --no-cache-dir \
+    polars==0.20.* \
+    pandas==2.1.* \
+    requests==2.31.* \
+    python-dotenv==1.0.* \
+    psycopg2-binary==2.9.* \
+    xlrd==2.0.* \
+    openpyxl==3.1.* \
+    google-api-python-client==2.* \
+    google-auth-httplib2==0.2.* \
+    google-auth-oauthlib==1.* \
+    jupyter \
+    ipython
+
+# Copy all project files
+COPY . .
+
+# Create data directories
+RUN mkdir -p data/raw data/processed data/metadata
+
+# Expose port for Jupyter (optional)
+EXPOSE 8888
+
+# Default command (can be overridden)
+CMD ["python", "run_data_pipeline.py"]

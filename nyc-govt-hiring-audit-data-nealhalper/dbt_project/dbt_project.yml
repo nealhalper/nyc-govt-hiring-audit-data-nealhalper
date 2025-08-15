@@ -1,0 +1,67 @@
+name: 'nyc_hiring_audit'
+version: '1.0.0'
+config-version: 2
+
+# This setting configures which "profile" dbt uses for this project.
+profile: 'nyc_hiring_audit'
+
+# These configurations specify where dbt should look for different types of files.
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+clean-targets:         # directories to be removed by `dbt clean`
+  - "target"
+  - "dbt_packages"
+
+# Model configurations
+models:
+  nyc_hiring_audit:
+    # Staging models - clean and standardize raw data
+    staging:
+      +materialized: view
+      +schema: staging
+      +docs:
+        node_color: "lightblue"
+    
+    # Intermediate models - business logic transformations
+    intermediate:
+      +materialized: view  
+      +schema: intermediate
+      +docs:
+        node_color: "orange"
+    
+    # Marts models - final business-ready models
+    marts:
+      +materialized: table
+      +schema: marts
+      +docs:
+        node_color: "green"
+
+# Seed configurations
+seeds:
+  nyc_hiring_audit:
+    +schema: seeds
+    +docs:
+      node_color: "purple"
+
+# Global variables
+vars:
+  # Date ranges for analysis
+  start_date: '2024-01-01'
+  end_date: '2025-12-31'
+  
+  # Business logic variables
+  fuzzy_match_threshold: 0.85
+  salary_variance_threshold: 0.20
+  
+  # Data quality thresholds
+  null_threshold: 0.05
+  duplicate_threshold: 0.01
+
+# Documentation
+docs:
+  generate: true

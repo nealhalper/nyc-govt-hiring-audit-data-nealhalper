@@ -1,0 +1,71 @@
+version: 2
+
+models:
+  - name: stg_job_postings
+    description: "Cleaned and standardized job postings from jobs.nyc.gov"
+    columns:
+      - name: job_id
+        description: "Unique identifier for each job posting"
+        tests:
+          - unique
+          - not_null
+      
+      - name: agency_name
+        description: "NYC agency posting the job"
+        tests:
+          - not_null
+      
+      - name: posting_date
+        description: "Date when job was posted"
+        tests:
+          - not_null
+      
+      - name: salary_range_from
+        description: "Minimum salary for the position"
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 500000
+      
+      - name: salary_range_to  
+        description: "Maximum salary for the position"
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 500000
+
+  - name: stg_payroll_data
+    description: "Cleaned and standardized NYC payroll data"
+    columns:
+      - name: payroll_number
+        description: "Anonymized employee identifier"
+        tests:
+          - not_null
+      
+      - name: agency_name
+        description: "NYC agency employing the person"
+        tests:
+          - not_null
+      
+      - name: base_salary
+        description: "Employee base salary"
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 1000000
+
+  - name: mart_job_posting_analysis
+    description: "Final business model combining job postings with salary benchmarks"
+    columns:
+      - name: job_id
+        description: "Unique job posting identifier"
+        tests:
+          - unique
+          - not_null
+      
+      - name: salary_match_ratio
+        description: "Confidence score for salary benchmark matching"
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 1

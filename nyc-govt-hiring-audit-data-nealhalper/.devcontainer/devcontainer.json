@@ -1,0 +1,84 @@
+{
+  "name": "NYC Hiring Audit Data Pipeline",
+  "dockerComposeFile": "../docker-compose.dev.yml",
+  "service": "devcontainer",
+  "workspaceFolder": "/workspace",
+  "shutdownAction": "stopCompose",
+
+  // Configure tool-specific properties.
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.linting.enabled": true,
+        "python.linting.pylintEnabled": false,
+        "python.linting.flake8Enabled": true,
+        "python.formatting.provider": "black",
+        "python.formatting.blackPath": "/usr/local/bin/black",
+        "python.linting.flake8Path": "/usr/local/bin/flake8",
+        "sqltools.connections": [
+          {
+            "name": "NYC Audit PostgreSQL",
+            "driver": "PostgreSQL",
+            "previewLimit": 50,
+            "server": "postgres",
+            "port": 5432,
+            "database": "nyc_hiring_audit",
+            "username": "airflow_user",
+            "password": "airflow_password"
+          }
+        ]
+      },
+      "extensions": [
+        "ms-python.python",
+        "ms-python.black-formatter",
+        "ms-python.flake8",
+        "ms-toolsai.jupyter",
+        "mtxr.sqltools",
+        "mtxr.sqltools-driver-pg",
+        "bastienboutonnet.vscode-dbt",
+        "innoverio.vscode-dbt-power-user",
+        "Evidence.evidence-vscode",
+        "ms-vscode.vscode-json",
+        "redhat.vscode-yaml",
+        "ms-azuretools.vscode-docker"
+      ]
+    }
+  },
+
+  // Use 'forwardPorts' to make a list of ports inside the container available locally.
+  "forwardPorts": [
+    5432,  // PostgreSQL
+    8080,  // Airflow UI
+    8000,  // DBT docs server
+    8888   // Jupyter
+  ],
+
+  "portsAttributes": {
+    "5432": {
+      "label": "PostgreSQL Database",
+      "onAutoForward": "notify"
+    },
+    "8080": {
+      "label": "Airflow Web UI",
+      "onAutoForward": "notify"
+    },
+    "8000": {
+      "label": "DBT Documentation",
+      "onAutoForward": "notify"
+    },
+    "8888": {
+      "label": "Jupyter Lab",
+      "onAutoForward": "notify"
+    }
+  },
+
+  // Use 'postCreateCommand' to run commands after the container is created.
+  "postCreateCommand": "bash .devcontainer/setup.sh",
+
+  // Configure container user
+  "remoteUser": "vscode",
+  
+  // Keep container alive
+  "overrideCommand": false
+}

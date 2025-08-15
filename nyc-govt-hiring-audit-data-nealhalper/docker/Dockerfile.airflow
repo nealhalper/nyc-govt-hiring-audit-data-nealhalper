@@ -1,0 +1,58 @@
+# Use Python 3.11 slim image as base
+FROM python:3.11-slim
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1
+ENV AIRFLOW_HOME=/opt/airflow
+ENV AIRFLOW_VERSION=2.8.1
+ENV PYTHON_VERSION=3.11
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    libpq-dev \
+    build-essential \
+    curl \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create airflow user
+RUN useradd -ms /bin/bash -d ${AIRFLOW_HOME} airflow
+
+# Install Apache Airflow with constraints
+RUN pip install --no-cache-dir \
+    "apache-airflow==${AIRFLOW_VERSION}" \
+    --constraint "https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
+
+# Install additional Python packages for our pipeline
+RUN pip install --no-cache-dir \
+    polars==0.20.* \
+    pandas==2.1.* \
+    requests==2.31.* \
+    python-dotenv==1.0.* \
+    psycopg2-binary==2.9.* \
+    xlrd==2.0.* \
+    openpyxl==3.1.* \
+    google-api-python-client==2.* \
+    google-auth-httplib2==0.2.* \
+    google-auth-oauthlib==1.* \
+    apache-airflow-providers-postgres==5.8.*
+
+# Set ownership of airflow home
+RUN chown -R airflow:airflow ${AIRFLOW_HOME}
+
+# Switch to airflow user
+USER airflow
+
+# Set working directory
+WORKDIR ${AIRFLOW_HOME}
+
+# Copy airflow configuration
+COPY --chown=airflow:airflow airflow/airflow.cfg ${AIRFLOW_HOME}/airflow.cfg
+
+# Expose port 8080 for webserver
+EXPOSE 8080
+
+# Default command
+CMD ["airflow", "webserver"]
